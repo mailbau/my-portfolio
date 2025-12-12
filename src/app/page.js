@@ -1,24 +1,37 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Github, Mail, ExternalLink, Code2, Database, Terminal, ArrowUpRight, Sparkles } from "lucide-react"
+import {
+  Github,
+  Mail,
+  ExternalLink,
+  Code2,
+  Database,
+  Terminal,
+  ArrowUpRight,
+  Sparkles,
+  Briefcase,
+  Calendar,
+  MapPin
+} from "lucide-react"
 import Link from "next/link"
 
 export default function Portfolio() {
   const [scrollY, setScrollY] = useState(0)
-  const [activeSection, setActiveSection] = useState("")
+  const [activeSection, setActiveSection] = useState("about")
 
   useEffect(() => {
     const handleScroll = () => {
       setScrollY(window.scrollY)
 
       // Update active section based on scroll position
-      const sections = ["about", "projects", "contact"]
+      const sections = ["about", "experience", "projects", "contact"]
       for (const section of sections) {
         const element = document.getElementById(section)
         if (element) {
           const rect = element.getBoundingClientRect()
-          if (rect.top <= 100 && rect.bottom >= 100) {
+          // Check if section is roughly in the middle of the viewport
+          if (rect.top <= 300 && rect.bottom >= 300) {
             setActiveSection(section)
             break
           }
@@ -30,39 +43,74 @@ export default function Portfolio() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  const experiences = [
+    {
+      role: "BRILiaN Future Leader Program - IT",
+      company: "PT Bank Rakyat Indonesia (Persero) Tbk",
+      period: "Nov 2025 - Present",
+      type: "On-site",
+      location: "Jakarta, Indonesia",
+      description: "Participating in the exclusive IT leadership development program at Indonesia's largest bank."
+    },
+    {
+      role: "IDCamp 2024 Scholarship Awardee",
+      company: "Indosat Ooredoo Hutchison Digital Camp",
+      period: "Sep 2024 - Jul 2025",
+      type: "Remote",
+      location: "Indonesia",
+      description: "Selected for the Backend Developer track. Successfully completed rigorous performance-based selections:",
+      details: [
+        "Beginner: Mastered REST API development using Node.js and Hapi.",
+        "Intermediate: Built complex APIs (OpenMusic) using PostgreSQL, JWT, Redis, and RabbitMQ.",
+        "Expert: Developed Forum API utilizing Clean Architecture, TDD, CI/CD, and security best practices."
+      ]
+    },
+    {
+      role: "IT Developer Intern",
+      company: "PT Indonesia Satu Tujuh Group",
+      period: "Jan 2024 - Mar 2024",
+      type: "Internship",
+      location: "Indonesia",
+      description: " contributed to software development projects, gaining hands-on experience in the professional IT workflow."
+    }
+  ]
+
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/20">
+
+      {/* Navigation */}
       <nav className="fixed w-full top-4 z-50 px-4">
-        <div className="max-w-4xl mx-auto bg-card/90 backdrop-blur-xl border border-border rounded-full shadow-2xl shadow-primary/10">
+        <div className="max-w-5xl mx-auto bg-card/90 backdrop-blur-xl border border-border rounded-full shadow-2xl shadow-primary/10">
           <div className="px-6 py-3 flex justify-between items-center">
             <span className="font-bold text-lg bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
               mailbau.
             </span>
-            <div className="flex gap-1 text-sm font-medium">
-              <Link
-                href="#about"
-                className={`px-4 py-2 rounded-full transition-all ${activeSection === "about" ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}`}
-              >
-                About
-              </Link>
-              <Link
-                href="#projects"
-                className={`px-4 py-2 rounded-full transition-all ${activeSection === "projects" ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}`}
-              >
-                Projects
-              </Link>
-              <Link
-                href="#contact"
-                className={`px-4 py-2 rounded-full transition-all ${activeSection === "contact" ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}`}
-              >
-                Contact
+            <div className="hidden md:flex gap-1 text-sm font-medium">
+              {["about", "experience", "projects", "contact"].map((item) => (
+                <Link
+                  key={item}
+                  href={`#${item}`}
+                  className={`capitalize px-4 py-2 rounded-full transition-all ${activeSection === item
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    }`}
+                >
+                  {item}
+                </Link>
+              ))}
+            </div>
+            {/* Mobile Menu Icon Placeholder (Optional) */}
+            <div className="md:hidden">
+              <Link href="#contact" className="p-2 text-primary">
+                <Mail size={20} />
               </Link>
             </div>
           </div>
         </div>
       </nav>
 
-      <header id="about" className="pt-32 pb-24 px-6 max-w-6xl mx-auto min-h-screen flex items-center">
+      {/* Hero Section */}
+      <header id="about" className="pt-32 pb-20 px-6 max-w-6xl mx-auto min-h-screen flex items-center">
         <div className="w-full">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6 animate-fade-in-up">
@@ -101,7 +149,7 @@ export default function Portfolio() {
                 </Link>
 
                 <Link
-                  href="muhammadismail1238@gmail.com"
+                  href="mailto:muhammadismail1238@gmail.com"
                   className="group flex items-center gap-2 bg-card text-foreground border-2 border-border px-6 py-3 rounded-xl hover:border-primary hover:scale-105 hover:shadow-lg hover:shadow-primary/20 transition-all"
                 >
                   <Mail size={20} />
@@ -136,6 +184,7 @@ export default function Portfolio() {
         </div>
       </header>
 
+      {/* Technologies Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
         <div className="max-w-6xl mx-auto px-6 relative">
@@ -162,6 +211,62 @@ export default function Portfolio() {
         </div>
       </section>
 
+      {/* Experience Section */}
+      <section id="experience" className="py-24 max-w-6xl mx-auto px-6 relative">
+        <div className="mb-16 animate-fade-in-up">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground">Experience</h2>
+          <p className="text-muted-foreground text-lg">My professional journey so far</p>
+        </div>
+
+        <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
+          {experiences.map((exp, index) => (
+            <div key={index} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active animate-fade-in-up">
+
+              {/* Timeline Dot */}
+              <div className="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-card group-hover:bg-primary group-hover:border-primary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-colors">
+                <Briefcase size={16} className="text-muted-foreground group-hover:text-primary-foreground" />
+              </div>
+
+              {/* Card Content */}
+              <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-card border border-border p-6 rounded-3xl hover:border-primary hover:shadow-2xl hover:shadow-primary/10 transition-all">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                  <span className="font-bold text-lg text-primary">{exp.company}</span>
+                  <div className="flex items-center gap-2 text-xs font-semibold px-2 py-1 bg-secondary rounded-lg text-muted-foreground">
+                    <Calendar size={12} />
+                    {exp.period}
+                  </div>
+                </div>
+
+                <h3 className="text-xl font-bold mb-2">{exp.role}</h3>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                  <MapPin size={14} />
+                  <span>{exp.location}</span>
+                  <span className="w-1 h-1 rounded-full bg-border" />
+                  <span>{exp.type}</span>
+                </div>
+
+                <p className="text-muted-foreground text-sm leading-relaxed mb-3">
+                  {exp.description}
+                </p>
+
+                {/* Render bullet points if details exist */}
+                {exp.details && (
+                  <ul className="space-y-2 mt-3">
+                    {exp.details.map((detail, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground/90">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                        <span>{detail}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Projects Section */}
       <section id="projects" className="py-24 max-w-6xl mx-auto px-6">
         <div className="mb-16 animate-fade-in-up">
           <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground">Featured Projects</h2>
@@ -252,6 +357,7 @@ export default function Portfolio() {
         </div>
       </section>
 
+      {/* Footer */}
       <footer id="contact" className="relative mt-24 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-accent/10 to-transparent" />
 
@@ -270,7 +376,7 @@ export default function Portfolio() {
             </p>
 
             <Link
-              href="muhammadismail1238@gmail.com"
+              href="mailto:muhammadismail1238@gmail.com"
               className="group inline-flex items-center gap-3 bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-4 rounded-2xl font-bold text-lg hover:scale-105 hover:shadow-2xl hover:shadow-primary/40 transition-all"
             >
               <Mail size={24} />
@@ -292,7 +398,7 @@ export default function Portfolio() {
                 <Github size={24} />
               </Link>
               <Link
-                href="muhammadismail1238@gmail.com"
+                href="mailto:muhammadismail1238@gmail.com"
                 className="p-3 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-all hover:scale-110"
               >
                 <Mail size={24} />
