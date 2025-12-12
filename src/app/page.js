@@ -1,21 +1,134 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef, useMemo } from "react"
 import {
   Github,
   Mail,
   ExternalLink,
-  Code2,
   Database,
   Terminal,
   ArrowUpRight,
   Sparkles,
   Briefcase,
   Calendar,
-  MapPin
+  MapPin,
+  Code2
 } from "lucide-react"
 import Link from "next/link"
 
+// --- FLOATING ICONS COMPONENT (Optimized for Performance) ---
+const FloatingIcons = () => {
+  const containerRef = useRef(null)
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+
+  // Refs to manage animation directly without triggering React re-renders
+  const requestRef = useRef()
+  const iconRefs = useRef([])
+  const physicsRef = useRef([])
+
+  // Tech Stack Images
+  const icons = useMemo(() => [
+    { name: "Python", src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg", size: 50 },
+    { name: "JavaScript", src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg", size: 45 },
+    { name: "TypeScript", src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg", size: 45 },
+    { name: "React", src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg", size: 50 },
+    { name: "Tailwind", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg", size: 50 },
+    { name: "TensorFlow", src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tensorflow/tensorflow-original.svg", size: 50 },
+    { name: "Docker", src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg", size: 55 },
+    { name: "AWS", src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg", size: 60 },
+    { name: "Git", src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg", size: 45 },
+    { name: "GitHub", src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg", size: 45 },
+  ], [])
+
+  // 1. Setup Dimensions & Initial Physics State
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const updateDimensions = () => {
+      const { offsetWidth: width, offsetHeight: height } = containerRef.current
+      setDimensions({ width, height })
+
+      // Initialize physics for each icon if not already set or if resized
+      if (physicsRef.current.length === 0 || physicsRef.current.length !== icons.length) {
+        physicsRef.current = icons.map(() => ({
+          x: Math.random() * (width - 80),
+          y: Math.random() * (height - 80),
+          vx: (Math.random() - 0.5) * 1.5, // Slightly increased speed
+          vy: (Math.random() - 0.5) * 1.5,
+        }))
+      }
+    }
+
+    updateDimensions()
+    window.addEventListener('resize', updateDimensions)
+    return () => window.removeEventListener('resize', updateDimensions)
+  }, [icons])
+
+  // 2. The Animation Loop (Runs outside of React render cycle)
+  const animate = () => {
+    if (!dimensions.width) return
+
+    physicsRef.current.forEach((p, i) => {
+      // Update Physics
+      p.x += p.vx
+      p.y += p.vy
+
+      // Bounce Logic
+      if (p.x <= 0 || p.x >= dimensions.width - 60) p.vx *= -1
+      if (p.y <= 0 || p.y >= dimensions.height - 60) p.vy *= -1
+
+      // Direct DOM Update (Fast!)
+      const el = iconRefs.current[i]
+      if (el) {
+        el.style.transform = `translate(${p.x}px, ${p.y}px)`
+      }
+    })
+
+    requestRef.current = requestAnimationFrame(animate)
+  }
+
+  useEffect(() => {
+    requestRef.current = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(requestRef.current)
+  }, [dimensions]) // Restart loop if dimensions change
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative w-full h-[400px] bg-card/30 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden shadow-inner shadow-primary/5 group"
+    >
+      {/* Background Label */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+        <span className="text-6xl md:text-8xl font-bold text-foreground/5 uppercase tracking-widest select-none">
+          Stack
+        </span>
+      </div>
+
+      {/* Icons */}
+      {icons.map((item, i) => (
+        <div
+          key={i}
+          ref={el => iconRefs.current[i] = el} // Store ref to element
+          className="absolute flex items-center justify-center p-3 bg-white/90 dark:bg-slate-800/90 border border-border/50 rounded-2xl shadow-lg backdrop-blur-md pointer-events-none will-change-transform"
+          style={{
+            zIndex: 10,
+            // Initial position is handled by the loop immediately
+          }}
+        >
+          <img
+            src={item.src}
+            alt={item.name}
+            width={item.size}
+            height={item.size}
+            className={`object-contain ${item.name === "GitHub" ? "dark:invert" : ""}`}
+          />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// --- MAIN PAGE COMPONENT ---
 export default function Portfolio() {
   const [scrollY, setScrollY] = useState(0)
   const [activeSection, setActiveSection] = useState("about")
@@ -23,14 +136,11 @@ export default function Portfolio() {
   useEffect(() => {
     const handleScroll = () => {
       setScrollY(window.scrollY)
-
-      // Update active section based on scroll position
       const sections = ["about", "experience", "projects", "contact"]
       for (const section of sections) {
         const element = document.getElementById(section)
         if (element) {
           const rect = element.getBoundingClientRect()
-          // Check if section is roughly in the middle of the viewport
           if (rect.top <= 300 && rect.bottom >= 300) {
             setActiveSection(section)
             break
@@ -38,7 +148,6 @@ export default function Portfolio() {
         }
       }
     }
-
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
@@ -71,7 +180,7 @@ export default function Portfolio() {
       period: "Jan 2024 - Mar 2024",
       type: "Internship",
       location: "Indonesia",
-      description: " contributed to software development projects, gaining hands-on experience in the professional IT workflow."
+      description: "Contributed to software development projects, gaining hands-on experience in the professional IT workflow."
     }
   ]
 
@@ -99,7 +208,6 @@ export default function Portfolio() {
                 </Link>
               ))}
             </div>
-            {/* Mobile Menu Icon Placeholder (Optional) */}
             <div className="md:hidden">
               <Link href="#contact" className="p-2 text-primary">
                 <Mail size={20} />
@@ -184,30 +292,18 @@ export default function Portfolio() {
         </div>
       </header>
 
-      {/* Technologies Section */}
+      {/* Floating Technologies Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
         <div className="max-w-6xl mx-auto px-6 relative">
-          <p className="text-center text-muted-foreground font-semibold mb-12 uppercase tracking-wider text-sm">
+          <p className="text-center text-muted-foreground font-semibold mb-12 uppercase tracking-wider text-sm animate-fade-in-up">
             Technologies I Work With
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { icon: Code2, name: "Python", color: "text-blue-400" },
-              { icon: Database, name: "Data Science", color: "text-green-400" },
-              { icon: Terminal, name: "C# / .NET", color: "text-purple-400" },
-              { icon: Code2, name: "JavaScript", color: "text-yellow-400" },
-            ].map((tech, i) => (
-              <div
-                key={tech.name}
-                className="group bg-card border border-border rounded-2xl p-6 hover:border-primary hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-2 transition-all duration-300 animate-fade-in-up"
-                style={{ animationDelay: `${i * 100}ms` }}
-              >
-                <tech.icon className={`${tech.color} mb-3 group-hover:scale-110 transition-transform`} size={32} />
-                <p className="font-bold text-lg text-foreground">{tech.name}</p>
-              </div>
-            ))}
+
+          <div className="animate-fade-in-up animation-delay-200">
+            <FloatingIcons />
           </div>
+
         </div>
       </section>
 
@@ -249,7 +345,6 @@ export default function Portfolio() {
                   {exp.description}
                 </p>
 
-                {/* Render bullet points if details exist */}
                 {exp.details && (
                   <ul className="space-y-2 mt-3">
                     {exp.details.map((detail, i) => (
